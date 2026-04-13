@@ -321,150 +321,49 @@ The table makes the mode differences immediately visible at a glance. If `tabula
 
 ---
 
-## Stress Test: Profile Screenshots
+## Profile Evaluation Results
 
-All six profiles run via `python -m src.main`. Screenshots captured from the terminal output.
+Six profiles tested — three standard and three adversarial — plus one weight experiment. Run `python -m src.main` to reproduce all outputs.
+
+---
 
 ### Profile 1: High-Energy Pop Fan
 ![High-Energy Pop Fan](Screenshots/profile_pop.png)
-
-### Profile 2: Chill Lofi Student
-![Chill Lofi Student](Screenshots/profile_lofi.png)
-
-### Profile 3: Deep Intense Rock
-![Deep Intense Rock](Screenshots/profile_rock.png)
-
-### Profile 4 (Adversarial): Conflicted — High Energy + Sad + Acoustic
-![Conflicted Profile](Screenshots/profile_conflicted.png)
-
-### Profile 5 (Adversarial): Unknown Genre — K-pop Not in Catalog
-![Unknown Genre Profile](Screenshots/profile_kpop.png)
-
-### Profile 6 (Edge Case): Perfectly Middle — Jazz / Relaxed / 0.5 Energy
-![Perfectly Middle Profile](Screenshots/profile_jazz.png)
-
----
-
-## Experiments You Tried
-
-Six profiles were tested — three standard and three adversarial — plus one weight-sensitivity experiment.
-
----
-
-### Profile 1: High-Energy Pop Fan
-
-```
-============================================================
-  Profile: High-Energy Pop Fan
-  genre=pop | mood=happy | energy=0.85 | acoustic=False
-============================================================
-
-  #1  Sunrise City  by  Neon Echo         Score: 4.96 / 6.00
-      - genre match: pop (+2.0)
-      - mood match: happy (+1.5)
-      - energy proximity: 0.82 vs target 0.85 (+1.46)
-
-  #2  Gym Hero  by  Max Pulse             Score: 3.38 / 6.00
-      - genre match: pop (+2.0)
-      - energy proximity: 0.93 vs target 0.85 (+1.38)
-
-  #3  Rooftop Lights  by  Indigo Parade   Score: 2.86 / 6.00
-      - mood match: happy (+1.5)
-      - energy proximity: 0.76 vs target 0.85 (+1.36)
-```
 
 **Observation:** Results feel right. Sunrise City is the obvious pick — it matches genre, mood, and energy. Gym Hero is also pop but tagged "intense" not "happy", so it drops to #2. Rooftop Lights (indie pop) makes #3 because its mood matches even though genre doesn't. Intuition confirmed.
 
 ---
 
 ### Profile 2: Chill Lofi Student
-
-```
-============================================================
-  Profile: Chill Lofi Student
-  genre=lofi | mood=chill | energy=0.4 | acoustic=True
-============================================================
-
-  #1  Midnight Coding  by  LoRoom         Score: 5.97 / 6.00
-  #2  Library Rain  by  Paper Lanterns    Score: 5.92 / 6.00
-  #3  Focus Flow  by  LoRoom              Score: 4.50 / 6.00
-  #4  Spacewalk Thoughts  by  Orbit Bloom Score: 3.82 / 6.00
-  #5  Coffee Shop Stories  by  Slow Stereo Score: 2.46 / 6.00
-```
+![Chill Lofi Student](Screenshots/profile_lofi.png)
 
 **Observation:** Top three are all lofi. The genre weight dominates — all three lofi songs in the catalog appear before any non-lofi song. Spacewalk Thoughts (#4, ambient) earns a spot because it matches mood and acoustic preference despite the wrong genre. This is genre lock-in in action.
 
 ---
 
 ### Profile 3: Deep Intense Rock
-
-```
-============================================================
-  Profile: Deep Intense Rock
-  genre=rock | mood=intense | energy=0.91 | acoustic=False
-============================================================
-
-  #1  Storm Runner  by  Voltline          Score: 5.00 / 6.00
-      - genre match: rock (+2.0)
-      - mood match: intense (+1.5)
-      - energy proximity: 0.91 vs target 0.91 (+1.5)   ← perfect match
-
-  #2  Gym Hero  by  Max Pulse             Score: 2.97 / 6.00
-  #3  Neon Riot  by  Gridlock             Score: 2.90 / 6.00
-```
+![Deep Intense Rock](Screenshots/profile_rock.png)
 
 **Observation:** Storm Runner is the only rock song in the catalog, so it dominates perfectly (5.00/6.00, exact energy). The gap between #1 and #2 is enormous (5.00 vs 2.97) — there is nothing else close. A real rock fan would likely be disappointed by the rest of the list.
 
 ---
 
 ### Profile 4 (Adversarial): Conflicted — High Energy + Sad + Acoustic
-
-```
-============================================================
-  Profile: Conflicted (high energy + sad + acoustic)
-  genre=classical | mood=sad | energy=0.90 | acoustic=True
-============================================================
-
-  #1  Quiet Hours  by  Aria Collective    Score: 4.98 / 6.00
-      - genre match: classical (+2.0)
-      - mood match: sad (+1.5)
-      - energy proximity: 0.22 vs target 0.90 (+0.48)  ← terrible energy fit
-      - acoustic match: acousticness=0.95 (+1.0)
-```
+![Conflicted Profile](Screenshots/profile_conflicted.png)
 
 **Observation — biggest surprise:** Quiet Hours has an energy of 0.22, but the user asked for 0.90. Despite this massive mismatch, the song scores 4.98/6.00 and wins easily because genre + mood + acoustic = 4.5 points before energy is even counted. The system recommends a near-silent classical piece to someone who asked for high energy. The formula has no way to detect internally contradictory profiles.
 
 ---
 
 ### Profile 5 (Adversarial): Unknown Genre — K-pop Not in Catalog
-
-```
-============================================================
-  Profile: Unknown Genre (k-pop not in catalog)
-  genre=k-pop | mood=happy | energy=0.80 | acoustic=False
-============================================================
-
-  #1  Sunrise City  by  Neon Echo         Score: 2.97 / 6.00
-      - mood match: happy (+1.5)
-      - energy proximity: 0.82 vs target 0.80 (+1.47)
-```
+![Unknown Genre Profile](Screenshots/profile_kpop.png)
 
 **Observation:** No genre match fires for anyone. The system still returns 5 songs — it degrades gracefully — but the best possible score is 2.97/6.00. The list is not bad (happy + high energy songs), but the user has no way to know their genre isn't represented. The system should ideally say "no k-pop in catalog" rather than silently recommending substitutes.
 
 ---
 
 ### Profile 6 (Edge Case): Perfectly Middle — Jazz / Relaxed / 0.5 Energy
-
-```
-============================================================
-  Profile: Perfectly Middle (jazz / relaxed / 0.5 energy)
-  genre=jazz | mood=relaxed | energy=0.5 | acoustic=True
-============================================================
-
-  #1  Coffee Shop Stories  by  Slow Stereo  Score: 5.80 / 6.00
-  #2  Island Breeze  by  Solar Keys         Score: 3.97 / 6.00
-  #3  Dust and Gold  by  Willow Creek       Score: 2.47 / 6.00
-```
+![Perfectly Middle Profile](Screenshots/profile_jazz.png)
 
 **Observation:** Coffee Shop Stories is the only jazz/relaxed song in the catalog — it scores 5.80 because it hits genre, mood, and acoustic, even though its energy (0.37) is off from the 0.50 target. Everything below #1 shows a large score drop (5.80 → 3.97). Same genre lock-in pattern as the Rock profile.
 
@@ -475,11 +374,6 @@ Six profiles were tested — three standard and three adversarial — plus one w
 Changed genre bonus from +2.0 → +1.0 and energy multiplier from 1.5 → 3.0 (max 3.0).
 
 ```
-============================================================
-  EXPERIMENT: Genre x0.5 (+1.0)  |  Energy x2.0 (+3.0)
-  Profile: High-Energy Pop Fan (same as above)
-============================================================
-
   BEFORE (default weights)          AFTER (experiment weights)
   #1  Sunrise City   4.96           #1  Sunrise City   5.41  (stays #1)
   #2  Gym Hero       3.38           #2  Rooftop Lights 4.23  (up from #3)
@@ -488,7 +382,7 @@ Changed genre bonus from +2.0 → +1.0 and energy multiplier from 1.5 → 3.0 (m
   #5  Storm Runner   1.41           #5  Storm Runner   2.82
 ```
 
-**What changed and why:** Gym Hero dropped from #2 to #3 because it is tagged "intense" not "happy" — with energy weighted higher, mood missed matters more. Rooftop Lights rose to #2 because its energy (0.76) is actually closer to the 0.85 target than Gym Hero's (0.93). Doubling the energy weight made the system more sensitive to exact energy matching and less forgiving of mood mismatches. The current genre weight acts as a strong anchor — weakening it produced more energy-driven, genre-agnostic results.
+**What changed and why:** Gym Hero dropped from #2 to #3 because it is tagged "intense" not "happy" — with energy weighted higher, the missed mood signal costs more. Rooftop Lights rose to #2 because its energy (0.76) is actually closer to the 0.85 target than Gym Hero's (0.93). Weakening the genre anchor produced more energy-sensitive, genre-agnostic results.
 
 ---
 
