@@ -52,6 +52,25 @@ PROFILES = {
         "target_energy":  0.91,
         "likes_acoustic": False,
     },
+    # Adversarial profiles
+    "Conflicted (High Energy + Sad + Acoustic)": {
+        "favorite_genre": "classical",
+        "favorite_mood":  "sad",
+        "target_energy":  0.90,
+        "likes_acoustic": True,
+    },
+    "Unknown Genre (K-pop not in catalog)": {
+        "favorite_genre": "k-pop",
+        "favorite_mood":  "happy",
+        "target_energy":  0.80,
+        "likes_acoustic": False,
+    },
+    "Perfectly Middle (Jazz / Relaxed / 0.5)": {
+        "favorite_genre": "jazz",
+        "favorite_mood":  "relaxed",
+        "target_energy":  0.50,
+        "likes_acoustic": True,
+    },
 }
 
 
@@ -196,6 +215,15 @@ def main() -> None:
 
     if not HAS_TABULATE:
         print("  [tip: run  pip install tabulate  for a prettier table]\n")
+
+    # ── Stress Test: Top 5 recommendations for every profile ──────────────
+    print("=" * 70)
+    print("  STRESS TEST: Top 5 Recommendations per Profile")
+    print("=" * 70)
+
+    for label, prefs in PROFILES.items():
+        results = recommend_songs(prefs, songs, k=5, mode="balanced")
+        print_results(label, prefs, results, full_reasons=True)
 
     # ── Challenge 1 + 4: Advanced features with tabulate ──────────────────
     print("=" * 70)

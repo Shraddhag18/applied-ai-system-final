@@ -321,6 +321,30 @@ The table makes the mode differences immediately visible at a glance. If `tabula
 
 ---
 
+## Stress Test: Profile Screenshots
+
+All six profiles run via `python -m src.main`. Screenshots captured from the terminal output.
+
+### Profile 1: High-Energy Pop Fan
+![High-Energy Pop Fan](Screenshots/profile_pop.png)
+
+### Profile 2: Chill Lofi Student
+![Chill Lofi Student](Screenshots/profile_lofi.png)
+
+### Profile 3: Deep Intense Rock
+![Deep Intense Rock](Screenshots/profile_rock.png)
+
+### Profile 4 (Adversarial): Conflicted — High Energy + Sad + Acoustic
+![Conflicted Profile](Screenshots/profile_conflicted.png)
+
+### Profile 5 (Adversarial): Unknown Genre — K-pop Not in Catalog
+![Unknown Genre Profile](Screenshots/profile_kpop.png)
+
+### Profile 6 (Edge Case): Perfectly Middle — Jazz / Relaxed / 0.5 Energy
+![Perfectly Middle Profile](Screenshots/profile_jazz.png)
+
+---
+
 ## Experiments You Tried
 
 Six profiles were tested — three standard and three adversarial — plus one weight-sensitivity experiment.
