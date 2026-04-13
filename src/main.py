@@ -15,7 +15,9 @@ from src.recommender import (
     load_songs,
     recommend_songs,
     apply_diversity_filter,
+    score_song,
     SCORING_MODES,
+    ScoringWeights,
 )
 
 try:
@@ -255,6 +257,52 @@ def main() -> None:
 
     print_diversity_demo("Chill Lofi Student", lofi, songs)
     print_diversity_demo("High-Energy Pop Fan", PROFILES["High-Energy Pop Fan"], songs)
+
+    # ── Challenge step 3: Weight experiment ───────────────────────────────
+    print("=" * 70)
+    print("  STEP 3: Weight Experiment")
+    print("=" * 70)
+    print_weight_experiment(songs)
+
+
+def print_weight_experiment(songs: list) -> None:
+    """Step 3 experiment: double energy weight, halve genre weight."""
+    prefs = PROFILES["High-Energy Pop Fan"]
+    _bar("Weight Experiment — High-Energy Pop Fan")
+    print("  Changing: genre +2.0 -> +1.0  |  energy x1.5 -> x3.0\n")
+
+    default_weights  = SCORING_MODES["balanced"]
+    experiment_weights = ScoringWeights(genre=1.0, mood=1.5, energy=3.0, acoustic=1.0)
+
+    def top5(weights):
+        scored = []
+        for song in songs:
+            sc, reasons = score_song(prefs, song, weights)
+            scored.append((song, sc, " | ".join(reasons)))
+        return sorted(scored, key=lambda x: x[1], reverse=True)[:5]
+
+    before = top5(default_weights)
+    after  = top5(experiment_weights)
+
+    rows = []
+    for i in range(5):
+        b_song, b_sc, _ = before[i]
+        a_song, a_sc, _ = after[i]
+        changed = " <-- changed" if b_song["title"] != a_song["title"] else ""
+        rows.append([
+            f"#{i+1}",
+            b_song["title"], f"{b_sc:.2f}",
+            a_song["title"], f"{a_sc:.2f}{changed}",
+        ])
+
+    if HAS_TABULATE:
+        print(tabulate(rows,
+                       headers=["", "BEFORE title", "Score", "AFTER title", "Score"],
+                       tablefmt="simple"))
+    else:
+        for r in rows:
+            print(f"  {r[0]}  {r[1]:<22} {r[2]}  ->  {r[3]:<22} {r[4]}")
+    print()
 
 
 if __name__ == "__main__":
