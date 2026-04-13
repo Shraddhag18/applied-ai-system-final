@@ -162,6 +162,54 @@ You can add more tests in `tests/test_recommender.py`.
 
 ---
 
+## Terminal Output
+
+Running `python -m src.main` with the default `lofi / chill / energy=0.40 / acoustic=True` profile:
+
+```
+Loaded 18 songs.
+
+========================================================
+  Top Recommendations
+  Profile: genre=lofi | mood=chill | energy=0.4 | acoustic=True
+========================================================
+
+#1  Midnight Coding  by  LoRoom
+     Score : 5.97 / 6.00
+     - genre match: lofi (+2.0)
+     - mood match: chill (+1.5)
+     - energy proximity: 0.42 vs target 0.40 (+1.47)
+     - acoustic match: acousticness=0.71 (+1.0)
+
+#2  Library Rain  by  Paper Lanterns
+     Score : 5.92 / 6.00
+     - genre match: lofi (+2.0)
+     - mood match: chill (+1.5)
+     - energy proximity: 0.35 vs target 0.40 (+1.42)
+     - acoustic match: acousticness=0.86 (+1.0)
+
+#3  Focus Flow  by  LoRoom
+     Score : 4.50 / 6.00
+     - genre match: lofi (+2.0)
+     - energy proximity: 0.40 vs target 0.40 (+1.5)
+     - acoustic match: acousticness=0.78 (+1.0)
+
+#4  Spacewalk Thoughts  by  Orbit Bloom
+     Score : 3.82 / 6.00
+     - mood match: chill (+1.5)
+     - energy proximity: 0.28 vs target 0.40 (+1.32)
+     - acoustic match: acousticness=0.92 (+1.0)
+
+#5  Coffee Shop Stories  by  Slow Stereo
+     Score : 2.46 / 6.00
+     - energy proximity: 0.37 vs target 0.40 (+1.46)
+     - acoustic match: acousticness=0.89 (+1.0)
+```
+
+The top two results (Midnight Coding and Library Rain) score near-perfect because they match on all four signals: genre, mood, energy proximity, and acoustic preference. Focus Flow drops to 4.50 because it is tagged `focused` not `chill`, so it misses the mood bonus. Spacewalk Thoughts and Coffee Shop Stories appear despite having different genres because their energy level and acousticness keep them in range for an acoustic-loving, low-energy user.
+
+---
+
 ## Experiments You Tried
 
 Use this section to document the experiments you ran. For example:
