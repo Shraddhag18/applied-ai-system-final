@@ -72,6 +72,61 @@ After scoring every song individually, the list is sorted in descending order by
 
 ---
 
+### Data Flow Diagram
+
+```mermaid
+flowchart TD
+    A["User Preferences\nfavorite_genre · favorite_mood\ntarget_energy · likes_acoustic"]
+    B["Load data/songs.csv\n18 songs"]
+    C{"For each song in catalog"}
+    D["Score the Song\n+2.0 genre match\n+1.5 mood match\n+1.5 × energy_closeness\n+1.0 acoustic bonus"]
+    E["Collect all\n(song, score, explanation)"]
+    F["Sort by Score\nDescending"]
+    G["Return Top K Songs\nwith scores and reasons"]
+
+    A --> C
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+```
+
+The key distinction is between the **Scoring Rule** (evaluates one song at a time and produces a number) and the **Ranking Rule** (compares all scores together to decide the final order). You need both steps — scoring alone doesn't tell you which songs to pick until you rank them relative to each other.
+
+---
+
+### Sample User Profile
+
+This is the profile used in `src/main.py` as the default test case. It is specific enough to clearly separate "intense rock" (high energy, intense mood, electric) from "chill lofi" (low energy, chill mood, acoustic):
+
+```python
+user_prefs = {
+    "favorite_genre": "lofi",       # exact match only — "lofi" won't match "indie pop"
+    "favorite_mood":  "chill",      # exact match only — "chill" won't match "relaxed"
+    "target_energy":  0.40,         # mid-low energy target
+    "likes_acoustic": True,         # adds +1.0 to songs with acousticness > 0.6
+}
+```
+
+A rock/intense user would look like `{"favorite_genre": "rock", "favorite_mood": "intense", "target_energy": 0.90, "likes_acoustic": False}` — showing how the same formula produces completely different rankings from different profiles.
+
+---
+
+### Known Biases and Expected Limitations
+
+| Bias | Why it happens | Effect |
+|---|---|---|
+| **Genre lock-in** | Genre match gives the highest weight (+2.0) | A great song in a different genre can never outscore a mediocre same-genre song |
+| **Exact mood matching** | Mood is categorical, not a spectrum | "relaxed" and "chill" score identically to "angry" — no partial credit for close moods |
+| **Energy math is linear** | We use absolute difference, not a curve | A song at 0.80 energy scores better than one at 0.90 for a user targeting 0.85 — but both feel similarly high-energy to a human |
+| **Acoustic users are privileged** | Only `likes_acoustic=True` gets a bonus | Users who dislike acoustic music get no equivalent negative signal — the system can't penalize acoustic songs |
+| **Catalog is tiny and Western-biased** | 18 songs, curated by the developer | Genres like Afrobeats, K-pop, or classical Hindustani are completely absent; the system cannot recommend what isn't in the catalog |
+
+The most consequential bias is **genre lock-in**: if a user's favorite genre has few songs in the catalog, they will receive near-identical results every time, creating a filter bubble.
+
+---
+
 ## Getting Started
 
 ### Setup
