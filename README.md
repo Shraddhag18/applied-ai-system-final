@@ -166,6 +166,8 @@ You can add more tests in `tests/test_recommender.py`.
 
 Running `python -m src.main` — full output with all optional challenges active:
 
+![Terminal Output](Screenshots/terminal_output.png)
+
 ### Recommendations table (Challenge 1 + 4: advanced features + tabulate)
 
 Profile: `genre=lofi | mood=chill | energy=0.40 | acoustic=True | popularity~65 | decade=2020s | tags=['cozy','studious','late-night']`
