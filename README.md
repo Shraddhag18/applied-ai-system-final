@@ -164,49 +164,86 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Terminal Output
 
-Running `python -m src.main` with the default `lofi / chill / energy=0.40 / acoustic=True` profile:
+Running `python -m src.main` — full output with all optional challenges active:
+
+### Recommendations table (Challenge 1 + 4: advanced features + tabulate)
+
+Profile: `genre=lofi | mood=chill | energy=0.40 | acoustic=True | popularity~65 | decade=2020s | tags=['cozy','studious','late-night']`
 
 ```
 Loaded 18 songs.
 
-========================================================
-  Top Recommendations
-  Profile: genre=lofi | mood=chill | energy=0.4 | acoustic=True
-========================================================
+======================================================================
+  Chill Lofi Student -- balanced mode with advanced prefs
+======================================================================
 
-#1  Midnight Coding  by  LoRoom
-     Score : 5.97 / 6.00
-     - genre match: lofi (+2.0)
-     - mood match: chill (+1.5)
-     - energy proximity: 0.42 vs target 0.40 (+1.47)
-     - acoustic match: acousticness=0.71 (+1.0)
+    Title               Artist            Score  Top Signal
+--  ------------------  --------------  -------  -------------------------------------------
+#1  Midnight Coding     LoRoom             7.57  genre match: lofi (+2.0)
+#2  Library Rain        Paper Lanterns     7.48  genre match: lofi (+2.0)
+#3  Focus Flow          LoRoom             5.78  genre match: lofi (+2.0)
+#4  Spacewalk Thoughts  Orbit Bloom        4.71  mood match: chill (+1.5)
+#5  Island Breeze       Solar Keys         3.35  energy proximity: 0.48 vs target 0.40 (+1.38)
 
-#2  Library Rain  by  Paper Lanterns
-     Score : 5.92 / 6.00
-     - genre match: lofi (+2.0)
-     - mood match: chill (+1.5)
-     - energy proximity: 0.35 vs target 0.40 (+1.42)
-     - acoustic match: acousticness=0.86 (+1.0)
-
-#3  Focus Flow  by  LoRoom
-     Score : 4.50 / 6.00
-     - genre match: lofi (+2.0)
-     - energy proximity: 0.40 vs target 0.40 (+1.5)
-     - acoustic match: acousticness=0.78 (+1.0)
-
-#4  Spacewalk Thoughts  by  Orbit Bloom
-     Score : 3.82 / 6.00
-     - mood match: chill (+1.5)
-     - energy proximity: 0.28 vs target 0.40 (+1.32)
-     - acoustic match: acousticness=0.92 (+1.0)
-
-#5  Coffee Shop Stories  by  Slow Stereo
-     Score : 2.46 / 6.00
-     - energy proximity: 0.37 vs target 0.40 (+1.46)
-     - acoustic match: acousticness=0.89 (+1.0)
+  #1 Midnight Coding -- full breakdown:
+       - genre match: lofi (+2.0)
+       - mood match: chill (+1.5)
+       - energy proximity: 0.42 vs target 0.40 (+1.47)
+       - acoustic match: 0.71 (+1.0)
+       - popularity: 65 vs target 65 (+0.5)
+       - decade match: 2020s (+0.5)
+       - tag matches: cozy, late-night (+0.6)
 ```
 
-The top two results (Midnight Coding and Library Rain) score near-perfect because they match on all four signals: genre, mood, energy proximity, and acoustic preference. Focus Flow drops to 4.50 because it is tagged `focused` not `chill`, so it misses the mood bonus. Spacewalk Thoughts and Coffee Shop Stories appear despite having different genres because their energy level and acousticness keep them in range for an acoustic-loving, low-energy user.
+Midnight Coding scores 7.57 (up from 5.97 in Phase 3) because three extra signals now fire: exact popularity match, decade match, and two mood-tag matches (cozy, late-night).
+
+### Mode comparison table (Challenge 2)
+
+```
+======================================================================
+  Mode Comparison -- High-Energy Pop Fan
+======================================================================
+
+Mode            #1 Song         Score  #2 Song           Score  Max pts
+--------------  ------------  -------  --------------  -------  ---------
+balanced        Sunrise City     4.96  Gym Hero           3.38  ~6.0
+genre_first     Sunrise City     5.48  Gym Hero           4.69  ~6.0
+mood_first      Sunrise City     4.73  Rooftop Lights     3.68  ~5.2
+energy_focused  Sunrise City     4.66  Gym Hero           3.76  ~5.5
+```
+
+`mood_first` is the only mode that changes the #2 pick — Rooftop Lights rises because it matches the "happy" mood even though its genre is "indie pop."
+
+### Diversity filter (Challenge 3)
+
+```
+======================================================================
+  Diversity Filter -- Chill Lofi Student
+======================================================================
+
+  BEFORE (no diversity filter):
+    Title               Genre    Artist            Score
+--  ------------------  -------  --------------  -------
+#1  Midnight Coding     lofi     LoRoom             7.57
+#2  Library Rain        lofi     Paper Lanterns     7.48
+#3  Focus Flow          lofi     LoRoom             5.78
+#4  Spacewalk Thoughts  ambient  Orbit Bloom        4.71
+#5  Island Breeze       reggae   Solar Keys         3.35
+
+  AFTER  (max 2 per genre, max 1 per artist):
+    Title                Genre    Artist            Score
+--  -------------------  -------  --------------  -------
+#1  Midnight Coding      lofi     LoRoom             7.57
+#2  Library Rain         lofi     Paper Lanterns     7.48
+#3  Spacewalk Thoughts   ambient  Orbit Bloom        4.71
+#4  Island Breeze        reggae   Solar Keys         3.35
+#5  Coffee Shop Stories  jazz     Slow Stereo        2.92
+
+  Removed (diversity rule): Focus Flow
+  Replaced with:            Coffee Shop Stories
+```
+
+Focus Flow is removed because (a) lofi already has 2 entries and (b) LoRoom already appears at #1. The filter exposes jazz and ambient songs the user would never have seen otherwise.
 
 ---
 
