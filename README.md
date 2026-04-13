@@ -2,32 +2,73 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+In this project I built a content-based music recommender that simulates how platforms like Spotify decide what to play next. My version takes a user's preferred genre, mood, energy level, and acoustic preference, then scores every song in the catalog against those preferences using a weighted formula. Songs are ranked by score and the top results are returned as personalized suggestions. The system is intentionally simple so the decision-making process stays visible and explainable, unlike the black-box models used at scale in production apps.
 
 ---
 
 ## How The System Works
 
-Explain your design in plain language.
+### How Real-World Recommendation Systems Work
 
-Some prompts to answer:
+Major streaming platforms use two main approaches to predict what users will love:
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+**Collaborative filtering** — "Users like you also liked this." The system looks at the listening history of thousands of users and finds patterns. If many people who enjoy the same songs as you also love a particular track, it recommends that track to you — even if the song has nothing obviously in common with your past listens. Spotify's Discover Weekly is a well-known example of this approach.
 
-You can include a simple diagram or bullet list if helpful.
+**Content-based filtering** — "This song has the same vibe as what you already like." The system analyzes attributes of the songs themselves — genre, tempo, mood, energy, acousticness — and recommends songs whose features closely match the user's taste profile. TikTok and YouTube use this heavily when a user is new and there isn't enough behavior data yet.
+
+Real platforms combine both approaches (called a hybrid system) and also factor in signals like skips, replays, playlist additions, time of day, and even geolocation. The key data types involved are:
+- **Behavioral signals**: likes, skips, play counts, playlist adds, listening duration
+- **Song attributes**: tempo (BPM), energy, valence (positivity), danceability, genre, mood, acousticness
+- **User context**: time of day, device, location, recently played
+
+My version uses **content-based filtering only**, which keeps the logic transparent and inspectable.
+
+---
+
+### My Version: Features and Scoring
+
+**`Song` object features:**
+| Feature | Type | Description |
+|---|---|---|
+| `genre` | string | Music genre (pop, lofi, rock, jazz, etc.) |
+| `mood` | string | Emotional tone (happy, chill, intense, relaxed, moody, focused) |
+| `energy` | float (0–1) | How energetic the track feels |
+| `tempo_bpm` | float | Beats per minute |
+| `valence` | float (0–1) | Musical positiveness |
+| `danceability` | float (0–1) | How suitable the song is for dancing |
+| `acousticness` | float (0–1) | How acoustic vs. electronic the song is |
+
+**`UserProfile` object stores:**
+- `favorite_genre` — the genre the user prefers most
+- `favorite_mood` — the mood/vibe the user is looking for
+- `target_energy` — how energetic a song the user wants (0–1)
+- `likes_acoustic` — whether the user prefers acoustic over electronic sounds
+
+**Scoring Rule (for one song):**
+
+A song's score is computed as a sum of weighted matches:
+
+```
+score = 0.0
+
+if song.genre == user.favorite_genre:
+    score += 3.0          # Genre is the strongest signal
+
+if song.mood == user.favorite_mood:
+    score += 2.0          # Mood match is second most important
+
+energy_closeness = 1.0 - abs(user.target_energy - song.energy)
+score += 2.0 * energy_closeness   # Rewards proximity, not just high/low energy
+
+if user.likes_acoustic and song.acousticness > 0.6:
+    score += 1.0          # Acoustic bonus for users who prefer it
+```
+
+Maximum possible score: **8.0**. Genre is worth the most because it is the broadest filter — a rock fan and a lofi fan will rarely enjoy the same songs regardless of energy or mood.
+
+**Ranking Rule (for the full catalog):**
+
+After scoring every song individually, the list is sorted in descending order by score. The top `k` songs (default 5) are returned as recommendations. This is the step that transforms individual scores into a ranked recommendation list.
 
 ---
 
