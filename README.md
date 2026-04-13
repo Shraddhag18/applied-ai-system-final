@@ -210,6 +210,78 @@ The top two results (Midnight Coding and Library Rain) score near-perfect becaus
 
 ---
 
+## Optional Challenges
+
+All four optional challenges are implemented. Run `python -m src.main` to see them all.
+
+---
+
+### Challenge 1: Advanced Song Features
+
+Three new attributes added to `data/songs.csv` (all 18 songs):
+
+| Column | Type | Example |
+|---|---|---|
+| `popularity` | int 0–100 | 65 (Midnight Coding), 85 (Gym Hero) |
+| `release_decade` | string | "2020s", "2010s" |
+| `mood_tags` | comma-separated string | "focused,late-night,cozy" |
+
+**Scoring rules for new features:**
+- **Popularity proximity**: `0.5 × (1 − |target_pop − song_pop| / 100)` — up to +0.5, rewards songs near the user's preferred popularity tier
+- **Decade match**: +0.5 for an exact decade match — rewards listeners who prefer a specific era
+- **Mood tags**: +0.3 per matched tag — partial credit for overlapping vibes across categories
+
+Effect: Midnight Coding's score for the Chill Lofi Student jumped from **5.97 → 7.57** because it matched popularity (65 = target), decade (2020s), and two tags (cozy, late-night).
+
+---
+
+### Challenge 2: Multiple Scoring Modes
+
+Four modes are defined in `SCORING_MODES` using a `ScoringWeights` dataclass (Strategy pattern):
+
+| Mode | Genre | Mood | Energy | Acoustic | Best for |
+|---|---|---|---|---|---|
+| `balanced` | 2.0 | 1.5 | 1.5 | 1.0 | Default — all signals weighted equally |
+| `genre_first` | 4.0 | 0.75 | 0.75 | 0.5 | Users who never leave their genre |
+| `mood_first` | 1.0 | 3.0 | 0.75 | 0.5 | Users chasing a specific vibe |
+| `energy_focused` | 1.0 | 0.75 | 3.0 | 0.75 | Activity-driven listening (gym, study) |
+
+Pass `mode="energy_focused"` to `recommend_songs()` or `apply_diversity_filter()` to switch. The mode comparison table for High-Energy Pop Fan shows `mood_first` is the only mode that promotes Rooftop Lights to #2 (because it matches "happy" mood even at lower energy).
+
+---
+
+### Challenge 3: Diversity and Fairness Logic
+
+`apply_diversity_filter()` in `recommender.py` walks the fully-ranked catalog and skips any song that exceeds `max_per_genre=2` or `max_per_artist=1`. It is a post-processing step — scores are unchanged.
+
+**Demo result (Chill Lofi Student):**
+```
+BEFORE:  #1 Midnight Coding [lofi/LoRoom]  #2 Library Rain [lofi]  #3 Focus Flow [lofi/LoRoom]
+AFTER:   #1 Midnight Coding [lofi/LoRoom]  #2 Library Rain [lofi]  #3 Spacewalk Thoughts [ambient]
+```
+Focus Flow was removed because (a) lofi already has 2 songs in results and (b) LoRoom already appears at #1. Coffee Shop Stories (jazz) and Island Breeze (reggae) fill the gaps, exposing the user to genres they would never have seen otherwise.
+
+---
+
+### Challenge 4: Visual Summary Table
+
+Uses the `tabulate` library (`pip install tabulate`) for clean terminal output. Install: `pip install -r requirements.txt`.
+
+```
+Mode comparison — High-Energy Pop Fan:
+
+Mode            #1 Song         Score  #2 Song           Score  Max pts
+--------------  ------------  -------  --------------  -------  ---------
+balanced        Sunrise City     4.96  Gym Hero           3.38  ~6.0
+genre_first     Sunrise City     5.48  Gym Hero           4.69  ~6.0
+mood_first      Sunrise City     4.73  Rooftop Lights     3.68  ~5.2
+energy_focused  Sunrise City     4.66  Gym Hero           3.76  ~5.5
+```
+
+The table makes the mode differences immediately visible at a glance. If `tabulate` is not installed, the code falls back to plain-text formatting automatically.
+
+---
+
 ## Experiments You Tried
 
 Six profiles were tested — three standard and three adversarial — plus one weight-sensitivity experiment.
