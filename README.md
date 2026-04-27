@@ -14,7 +14,9 @@ The original system takes a user's preferred genre, mood, energy level, and acou
 
 ### System Architecture
 
-See [system_architecture.md](system_architecture.md) for full architecture diagram and design rationale.
+![System Architecture Diagram](assets/system_architecture.png)
+
+See [system_architecture.md](system_architecture.md) for full design rationale.
 
 ```
 src/

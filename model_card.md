@@ -1,10 +1,10 @@
-# Model Card: VibeFinder 1.0
+# Model Card: VibeFinder 2.0
 
 ---
 
 ## 1. Model Name
 
-**VibeFinder 1.0** — a content-based music recommender simulation.
+**VibeFinder 2.0** — an applied AI music recommendation system with knowledge retrieval, agentic planning, bias detection, and guardrails. Extended from the Module 3 Music Recommender Simulation (VibeFinder 1.0).
 
 ---
 
@@ -151,3 +151,49 @@ The explanations made the difference. When the system says "#1 Midnight Coding �
 **What would I try next?**
 
 I would add a second scoring pass that enforces diversity. After the initial ranking, if songs 1–3 are all the same genre, the system would insert the highest-scoring song from a different genre at position 3, pushing the duplicate down. This single change would break the filter bubble at minimal cost to relevance — and would make the system feel much more like a real music discovery tool rather than a catalog filter. I would also want to test what happens when the catalog grows to 200+ songs: at that scale, genre lock-in becomes less visible because there are many songs to choose from within each genre, and the energy and mood signals become the real differentiators.
+
+---
+
+## 10. VibeFinder 2.0 — Applied AI System Extensions
+
+### New AI Features
+
+**RAG-style Knowledge Retrieval:** Two knowledge bases — mood taxonomy (12 moods with pairwise similarity scores) and genre guides (15 genres with related genres and typical energy ranges) — enable soft matching. The retrieval module (`src/retrieval.py`) loads these at startup and provides similarity scores to the agent. For example, "chill" and "relaxed" now receive a similarity of 0.85 instead of being treated as completely different moods.
+
+**Agentic Planning Loop:** The recommendation agent (`src/agent.py`) implements a 6-step workflow: ANALYZE → RETRIEVE → SCORE → CRITIQUE → REFINE → EXPLAIN. Each step is logged with its input, output, and decision reasoning. When confidence is low, the agent automatically tries alternative scoring modes. This is observable in the CLI output where each step's decision is printed.
+
+**Bias Detection:** The bias detector (`src/bias_detector.py`) provides quantitative fairness metrics: genre coverage analysis, genre lockout detection (when a user's genre has zero songs), Shannon entropy diversity index, contradiction detection (conflicting preferences), and a composite fairness score. Running across all 6 test profiles, the system scores 0.90/1.00 on fairness — penalized primarily by the K-pop genre lockout.
+
+**Guardrails & Confidence Scoring:** Input validation (`src/guardrails.py`) catches malformed profiles before scoring. The confidence scorer (`src/confidence.py`) evaluates every recommendation set on 4 factors: score quality (how close to max?), score spread (dominance detection), genre coverage (is the genre in the catalog?), and profile coherence (do preferences conflict?). Confidence levels: HIGH (≥0.7), MEDIUM (0.4–0.7), LOW (<0.4).
+
+### Reliability Testing Results
+
+66 tests pass across 7 test modules. Key findings from structured experiments:
+
+- **Determinism:** 100% — same input always produces same output
+- **Degradation:** Graceful — works with 1 song, 0 songs, shrinking catalogs
+- **Adversarial catch rate:** ≥70% — combined validator + agent + confidence scorer
+- **Mode sensitivity:** Top pick is stable across all 4 scoring modes for well-represented profiles
+- **Confidence accuracy:** HIGH (0.86) for standard profiles, MEDIUM (0.46–0.50) for adversarial — correctly reflects result quality
+
+### Updated Bias Assessment
+
+With v2.0's bias detection, the system now *quantifies* the biases identified in v1.0:
+
+| Bias | v1.0 Status | v2.0 Status |
+|------|------------|------------|
+| Genre lock-in | Known but unmeasured | Measured: Shannon entropy shows low diversity for lofi/rock profiles |
+| Mood binary matching | No partial credit | Taxonomy provides graduated scores (chill/relaxed = 0.85) — ready for integration |
+| Contradictory profiles | Undetected | Detected: confidence drops to 0.46 with explicit critique |
+| Missing genres (K-pop) | Silent failure | Explicit warning + confidence drop to 0.50 |
+| Catalog bias | Known but no metrics | Fairness score: 0.90/1.00 across 6 profiles |
+
+### AI Collaboration in v2.0
+
+**How AI tools helped:** AI assisted with designing the mood taxonomy similarity scores, suggesting the agentic loop pattern (analyze → critique → refine), and generating adversarial test profiles I wouldn't have considered (e.g., acoustic + high energy contradiction).
+
+**One helpful suggestion:** The agentic loop with explicit CRITIQUE and REFINE steps — this pattern made the system's reasoning fully transparent and auditable. Each step logs its decision, so a reviewer can trace exactly why the system made each choice.
+
+**One flawed suggestion:** An AI suggestion to use cosine similarity for mood matching would have required embedding vectors that don't exist in the system. I used a lookup-table approach instead, which is simpler and equally effective for 12 moods.
+
+**What I verified manually:** All mood similarity scores (e.g., chill/angry should be near 0.0, chill/relaxed near 1.0), the confidence scoring weights, and that the agent's refine step actually produces different results when triggered.
