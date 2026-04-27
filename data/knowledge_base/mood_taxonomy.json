@@ -1,0 +1,210 @@
+{
+  "description": "Mood similarity taxonomy for soft mood matching. Each mood maps to its neighbors with similarity scores (0.0 = unrelated, 1.0 = identical).",
+  "version": "1.0",
+  "moods": {
+    "happy": {
+      "description": "Upbeat, joyful, feel-good energy",
+      "similar": {
+        "happy": 1.0,
+        "energetic": 0.7,
+        "relaxed": 0.4,
+        "chill": 0.3,
+        "romantic": 0.3,
+        "nostalgic": 0.2,
+        "focused": 0.1,
+        "moody": 0.1,
+        "melancholic": 0.05,
+        "sad": 0.0,
+        "angry": 0.0,
+        "intense": 0.2
+      }
+    },
+    "chill": {
+      "description": "Low-key, laid-back, casual vibe",
+      "similar": {
+        "chill": 1.0,
+        "relaxed": 0.85,
+        "focused": 0.6,
+        "melancholic": 0.3,
+        "nostalgic": 0.4,
+        "happy": 0.3,
+        "romantic": 0.3,
+        "moody": 0.25,
+        "sad": 0.2,
+        "energetic": 0.1,
+        "intense": 0.0,
+        "angry": 0.0
+      }
+    },
+    "intense": {
+      "description": "Powerful, driving, high-impact sound",
+      "similar": {
+        "intense": 1.0,
+        "angry": 0.7,
+        "energetic": 0.65,
+        "moody": 0.3,
+        "happy": 0.2,
+        "focused": 0.2,
+        "nostalgic": 0.1,
+        "romantic": 0.05,
+        "sad": 0.1,
+        "chill": 0.0,
+        "relaxed": 0.0,
+        "melancholic": 0.1
+      }
+    },
+    "relaxed": {
+      "description": "Calm, peaceful, easygoing atmosphere",
+      "similar": {
+        "relaxed": 1.0,
+        "chill": 0.85,
+        "focused": 0.5,
+        "nostalgic": 0.4,
+        "romantic": 0.35,
+        "happy": 0.4,
+        "melancholic": 0.3,
+        "moody": 0.2,
+        "sad": 0.15,
+        "energetic": 0.1,
+        "intense": 0.0,
+        "angry": 0.0
+      }
+    },
+    "moody": {
+      "description": "Atmospheric, introspective, emotionally textured",
+      "similar": {
+        "moody": 1.0,
+        "melancholic": 0.7,
+        "sad": 0.5,
+        "nostalgic": 0.5,
+        "intense": 0.3,
+        "chill": 0.25,
+        "romantic": 0.3,
+        "relaxed": 0.2,
+        "focused": 0.15,
+        "angry": 0.2,
+        "happy": 0.1,
+        "energetic": 0.1
+      }
+    },
+    "focused": {
+      "description": "Concentration-enhancing, steady, non-distracting",
+      "similar": {
+        "focused": 1.0,
+        "chill": 0.6,
+        "relaxed": 0.5,
+        "melancholic": 0.2,
+        "nostalgic": 0.2,
+        "moody": 0.15,
+        "intense": 0.2,
+        "happy": 0.1,
+        "romantic": 0.1,
+        "energetic": 0.15,
+        "sad": 0.1,
+        "angry": 0.0
+      }
+    },
+    "romantic": {
+      "description": "Intimate, sensual, emotionally warm",
+      "similar": {
+        "romantic": 1.0,
+        "relaxed": 0.35,
+        "happy": 0.3,
+        "chill": 0.3,
+        "moody": 0.3,
+        "nostalgic": 0.4,
+        "melancholic": 0.25,
+        "sad": 0.2,
+        "focused": 0.1,
+        "energetic": 0.1,
+        "intense": 0.05,
+        "angry": 0.0
+      }
+    },
+    "nostalgic": {
+      "description": "Wistful, memory-evoking, bittersweet",
+      "similar": {
+        "nostalgic": 1.0,
+        "melancholic": 0.6,
+        "moody": 0.5,
+        "romantic": 0.4,
+        "relaxed": 0.4,
+        "chill": 0.4,
+        "sad": 0.4,
+        "happy": 0.2,
+        "focused": 0.2,
+        "intense": 0.1,
+        "energetic": 0.1,
+        "angry": 0.0
+      }
+    },
+    "sad": {
+      "description": "Sorrowful, contemplative, emotionally heavy",
+      "similar": {
+        "sad": 1.0,
+        "melancholic": 0.8,
+        "moody": 0.5,
+        "nostalgic": 0.4,
+        "romantic": 0.2,
+        "chill": 0.2,
+        "relaxed": 0.15,
+        "focused": 0.1,
+        "intense": 0.1,
+        "angry": 0.15,
+        "happy": 0.0,
+        "energetic": 0.0
+      }
+    },
+    "energetic": {
+      "description": "High-energy, pumping, adrenaline-boosting",
+      "similar": {
+        "energetic": 1.0,
+        "intense": 0.65,
+        "happy": 0.7,
+        "angry": 0.3,
+        "focused": 0.15,
+        "moody": 0.1,
+        "romantic": 0.1,
+        "nostalgic": 0.1,
+        "relaxed": 0.1,
+        "chill": 0.1,
+        "melancholic": 0.0,
+        "sad": 0.0
+      }
+    },
+    "melancholic": {
+      "description": "Deeply reflective, tinged with gentle sorrow",
+      "similar": {
+        "melancholic": 1.0,
+        "sad": 0.8,
+        "moody": 0.7,
+        "nostalgic": 0.6,
+        "romantic": 0.25,
+        "relaxed": 0.3,
+        "chill": 0.3,
+        "focused": 0.2,
+        "intense": 0.1,
+        "angry": 0.1,
+        "happy": 0.05,
+        "energetic": 0.0
+      }
+    },
+    "angry": {
+      "description": "Aggressive, cathartic, raw emotional release",
+      "similar": {
+        "angry": 1.0,
+        "intense": 0.7,
+        "energetic": 0.3,
+        "moody": 0.2,
+        "sad": 0.15,
+        "melancholic": 0.1,
+        "nostalgic": 0.0,
+        "focused": 0.0,
+        "romantic": 0.0,
+        "relaxed": 0.0,
+        "chill": 0.0,
+        "happy": 0.0
+      }
+    }
+  }
+}
