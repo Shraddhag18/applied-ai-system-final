@@ -1,8 +1,183 @@
-# 🎵 Music Recommender Simulation
+# 🎵 VibeFinder 2.0 — Applied AI Music Recommendation System
 
 ## Project Summary
 
-In this project I built a content-based music recommender that simulates how platforms like Spotify decide what to play next. My version takes a user's preferred genre, mood, energy level, and acoustic preference, then scores every song in the catalog against those preferences using a weighted formula. Songs are ranked by score and the top results are returned as personalized suggestions. The system is intentionally simple so the decision-making process stays visible and explainable, unlike the black-box models used at scale in production apps.
+VibeFinder 2.0 extends a content-based music recommender simulation (Module 3) into a full **Applied AI System** that demonstrates retrieval-augmented knowledge, agentic planning, bias detection, guardrails, and reliability testing.
+
+The original system takes a user's preferred genre, mood, energy level, and acoustic preference, then scores every song in the catalog using a weighted formula. **Version 2.0** adds:
+
+- **🔍 RAG-style Knowledge Retrieval** — Mood taxonomy and genre relationship guides enable soft matching (e.g., "chill" and "relaxed" now get partial credit instead of being treated as completely different)
+- **🤖 Agentic Planning Loop** — A 6-step agent that analyzes → retrieves → scores → critiques → refines → explains, with full reasoning logs
+- **⚖️ Bias Detection & Fairness Metrics** — Quantitative analysis: genre lockout detection, diversity index (Shannon entropy), contradiction detection, fairness scoring
+- **🛡️ Guardrails & Confidence Scoring** — Input validation, output quality checks, multi-factor confidence scoring with self-critique
+- **🧪 Reliability Experiments** — Structured tests for determinism, graceful degradation, adversarial handling, and mode sensitivity
+
+### System Architecture
+
+See [system_architecture.md](system_architecture.md) for full architecture diagram and design rationale.
+
+```
+src/
+├── recommender.py     # Core scoring engine (v1.0 preserved)
+├── retrieval.py       # RAG-style knowledge retrieval
+├── agent.py           # Agentic planning loop
+├── bias_detector.py   # Fairness evaluation metrics
+├── guardrails.py      # Input/output safety checks
+└── confidence.py      # Confidence scoring & self-critique
+
+data/knowledge_base/
+├── mood_taxonomy.json  # 12 moods with pairwise similarity scores
+└── genre_guides.json   # 15 genres with relationships & typical ranges
+
+tests/                  # 66 tests across 7 test files
+experiments/            # Reliability experiment report
+```
+
+### Quick Start
+
+```bash
+pip install -r requirements.txt
+python -m src.main          # Run full demo (6 sections)
+pytest tests/ -v            # Run all 66 tests
+```
+
+### Test Results
+
+```
+66 passed in 0.32s
+```
+
+| Test Module | Tests | Description |
+|-------------|-------|-------------|
+| test_recommender.py | 2 | Core scoring & ranking |
+| test_retrieval.py | 13 | Mood/genre knowledge retrieval |
+| test_bias_detector.py | 12 | Fairness metrics |
+| test_guardrails.py | 10 | Input/output validation |
+| test_agent.py | 8 | Agentic workflow |
+| test_reliability.py | 8 | Determinism, degradation, adversarial |
+
+---
+
+### Sample Interactions
+
+Below are 3 examples showing how the agentic system processes different user profiles and produces AI-driven outputs.
+
+**Example 1: Standard Profile (Chill Lofi Student)**
+```
+Input:  genre=lofi | mood=chill | energy=0.40 | acoustic=True
+
+Agent Steps:
+  [ANALYZE ] Profile is valid
+  [RETRIEVE] Knowledge context loaded
+  [SCORE   ] Scored 18 songs using 'balanced' mode
+  [CRITIQUE] Confidence=HIGH (0.86)
+  [REFINE  ] Skipped — confidence is acceptable
+  [EXPLAIN ] Generated final explanation
+
+Output:
+  #1  Midnight Coding     LoRoom          7.57  genre match: lofi (+2.0)
+  #2  Library Rain        Paper Lanterns  7.48  genre match: lofi (+2.0)
+  #3  Focus Flow          LoRoom          5.78  genre match: lofi (+2.0)
+  Confidence: HIGH (0.86)
+```
+
+**Example 2: Adversarial Profile (Conflicted Preferences)**
+```
+Input:  genre=classical | mood=sad | energy=0.90 | acoustic=True
+
+Agent Steps:
+  [ANALYZE ] Profile is valid
+  [RETRIEVE] Knowledge context loaded with 1 warnings
+  [SCORE   ] Scored 18 songs using 'balanced' mode
+  [CRITIQUE] Confidence=MEDIUM (0.46)
+  [REFINE  ] Skipped — confidence is acceptable
+  [EXPLAIN ] Generated final explanation
+
+Output:
+  #1  Quiet Hours  Aria Collective  4.98
+  Confidence: MEDIUM (0.46)
+  Critique:
+    - Energy 0.90 conflicts with 'classical' typical range [0.1-0.5]
+    - Acoustic preference with high energy (0.90) is unusual
+    - Only 1 'classical' song in catalog — results will be repetitive
+```
+
+**Example 3: Missing Genre (K-pop Not in Catalog)**
+```
+Input:  genre=k-pop | mood=happy | energy=0.80 | acoustic=False
+
+Agent Steps:
+  [ANALYZE ] Profile is valid
+  [RETRIEVE] Knowledge context loaded with 1 warnings
+  [SCORE   ] Scored 18 songs using 'balanced' mode
+  [CRITIQUE] Confidence=MEDIUM (0.50) — quality checks failed
+  [REFINE  ] Skipped — confidence is acceptable
+  [EXPLAIN ] Generated final explanation
+
+Output:
+  #1  Sunrise City  Neon Echo  2.97
+  Confidence: MEDIUM (0.50)
+  Warnings:
+    - Genre 'k-pop' not in knowledge base — no songs in catalog will match
+  Critique:
+    - Genre 'k-pop' is not in the catalog at all
+    - No 'k-pop' songs available — showing best alternatives
+```
+
+Notice how the agent's confidence drops from HIGH (0.86) to MEDIUM (0.46–0.50) when it encounters contradictory or missing-genre profiles. The critique explains *why* confidence is lower and what the limitations are. This is a key difference from v1.0, which silently returned results without any quality assessment.
+
+---
+
+### Design Decisions
+
+| Decision | Rationale | Trade-off |
+|----------|-----------|-----------|
+| **Local JSON knowledge bases instead of API calls** | Keeps the system self-contained, deterministic, and runnable by anyone without API keys | Cannot dynamically update knowledge; mood/genre similarities are fixed |
+| **6-step agentic loop instead of single function** | Makes the reasoning chain visible and auditable; enables self-correction via the refine step | More complex code structure; overhead for simple profiles that don't need refinement |
+| **Separate bias detection from guardrails** | Guardrails check individual inputs/outputs (per-request); bias detection checks fairness across profiles (periodic) | Two modules to maintain instead of one |
+| **Confidence as a weighted composite** | Combines 4 factors (score quality, spread, genre coverage, profile coherence) into one 0–1 score | Weights are hand-tuned; different users may value factors differently |
+| **Soft matching as opt-in enhancement** | Preserving v1.0 scoring ensures backward compatibility and allows direct comparison | Enhanced scoring not yet integrated into the main scoring pipeline (ready for future integration) |
+| **Strategy pattern for scoring modes** | Adding a new mode requires only adding a `ScoringWeights` instance, no code changes | All modes share the same scoring formula — truly different algorithms would need refactoring |
+
+---
+
+### Testing Summary
+
+66 out of 66 tests pass across 7 test modules. Key findings:
+
+- **Determinism:** The system always produces identical output for identical input. No randomness exists in the pipeline.
+- **Graceful degradation:** Works correctly with 1 song, 0 songs, and shrinking catalogs — never crashes.
+- **Adversarial catch rate:** The combined validator + agent + confidence scorer catches ≥70% of adversarial profiles. The validator alone catches 40% (syntactic issues), but the agent's confidence scoring catches the semantically contradictory ones.
+- **Mode sensitivity:** The top pick (Sunrise City for Pop Fan) is stable across all 4 scoring modes. Mode changes primarily affect positions #2–#5.
+- **Confidence scores:** Averaged 0.86 for well-matched profiles, 0.46–0.50 for adversarial profiles. The system's confidence accurately reflects result quality.
+
+See [experiments/reliability_report.md](experiments/reliability_report.md) for the full reliability experiment report.
+
+---
+
+### Reflection
+
+Building VibeFinder 2.0 taught me that the gap between "the algorithm works" and "the system is trustworthy" is enormous. Version 1.0 gave correct results but silently failed on adversarial inputs — a K-pop fan received mediocre recommendations with no explanation. Version 2.0 addresses this through layered guardrails: the agent detects that k-pop is missing, lowers its confidence score, and explicitly warns the user.
+
+**Limitations and biases in the system:**
+- Genre lock-in remains the strongest bias — genre weight dominates all other signals.
+- The catalog (18 songs) is tiny and Western-biased. Entire cultures of music are absent.
+- Confidence scoring weights are hand-tuned — different users would reasonably disagree about what factors matter most.
+- The mood taxonomy captures English-language mood concepts; non-Western emotional frameworks are not represented.
+
+**Could the system be misused?** In its current form, the biggest risk is filter bubbles. If deployed at scale, the genre lock-in bias would trap users in narrow listening patterns. The diversity filter partially addresses this, but it's a post-processing band-aid rather than a fundamental fix.
+
+**What surprised me during testing:** The Conflicted profile (classical + sad + high energy = 0.90) was the most revealing test case. The system correctly identified this as a contradictory profile (confidence dropped to 0.46) and flagged that energy 0.90 is outside classical's typical range [0.1–0.5]. In v1.0, this profile silently received a near-silent track as the "#1" recommendation. In v2.0, the system at least *tells you* it's unsure.
+
+**AI collaboration:** I used AI tools to accelerate the research and structure phases — understanding RAG patterns, generating the mood taxonomy, and designing adversarial test profiles. I had to double-check any suggestion involving the scoring math and verify that the knowledge base similarity scores were reasonable (e.g., making sure "chill" and "angry" had near-zero similarity). The most helpful AI contribution was suggesting the agentic loop pattern with explicit critique and refine steps. One suggestion I had to reject was using cosine similarity for mood matching — it would have required embedding vectors that don't exist in this system, so I used a simpler lookup-table approach instead.
+
+Full model card: [model_card.md](model_card.md)
+
+---
+
+## Original v1.0 Documentation
+
+> Everything below documents the original Music Recommender Simulation from Module 3.
 
 ---
 
