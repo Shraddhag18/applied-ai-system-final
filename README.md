@@ -18,6 +18,10 @@ The original system takes a user's preferred genre, mood, energy level, and acou
 
 See [system_architecture.md](system_architecture.md) for full design rationale.
 
+### 🎥 Demo Walkthrough
+
+[**Watch the full demo on Loom →**](https://www.loom.com/share/e8c55ab142c9443c8160fd071e9ac415)
+
 ```
 src/
 ├── recommender.py     # Core scoring engine (v1.0 preserved)
